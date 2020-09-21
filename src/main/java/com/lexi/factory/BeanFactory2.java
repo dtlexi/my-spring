@@ -17,7 +17,7 @@ public class BeanFactory2 {
     {
         this.singletonObjects=new HashMap<String, Object>();
         this.earlySingletonObjects=new HashMap<String, Object>();
-        this.singletonFactories=new HashMap<>();
+        this.singletonFactories=new HashMap<String, ObjectFactory<?>>();
     }
 
     // 创建对象
