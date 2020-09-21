@@ -6,4 +6,9 @@ public class A {
 	public B getB() {
 		return b;
 	}
+
+	public void say()
+	{
+		System.out.println("hello");
+	}
 }

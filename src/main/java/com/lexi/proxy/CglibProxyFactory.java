@@ -1,8 +1,6 @@
 package com.lexi.proxy;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.*;
 
 import java.lang.reflect.Method;
 
@@ -18,7 +16,11 @@ public class CglibProxyFactory implements MethodInterceptor {
     {
         Enhancer enhancer=new Enhancer();
         enhancer.setSuperclass(target.getClass());
-        enhancer.setCallback(this);
+        enhancer.setCallbackFilter(new MyCallFilter());
+        enhancer.setCallbacks(new Callback[]{
+                NoOp.INSTANCE,
+                this
+        });
         return  enhancer.create();
     }
 

@@ -7,10 +7,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BeanFactory {
-	private HashMap<String,Object> singletonObjects;
-	private HashMap<String,Object> earlySingletonObjects;
+	private final Map<String,Object> singletonObjects;
+	private final Map<String,Object> earlySingletonObjects;
 
 	public BeanFactory()
 	{
@@ -23,10 +24,17 @@ public class BeanFactory {
 		Constructor constructor=beanCls.getDeclaredConstructor();
 		T bean= (T)constructor.newInstance();
 
-		this.earlySingletonObjects.put(beanName,bean);
+		earlySingletonObjects.put(beanName,bean);
+
 		this.populateBean(bean);
 
-		bean= (T) this.wrapInstance(bean);
+		// 判断当前是否需要aop,我们这边写死
+		boolean warpIfNecessary=true;
+		if(warpIfNecessary)
+		{
+			bean= (T) this.wrapInstance(bean);
+		}
+
 		return bean;
 	}
 
