@@ -1,6 +1,7 @@
 package com.lexi.factory;
 
 import com.lexi.proxy.CglibProxyFactory;
+import com.lexi.proxy.ProxyCreator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -11,13 +12,15 @@ public class BeanFactory2 {
     private final Map<String,Object> singletonObjects;
     private final Map<String,Object> earlySingletonObjects;
     private final Map<String, ObjectFactory<?>> singletonFactories;
-    private final boolean allowCircularReferences=true;
+
+    private final ProxyCreator proxyCreator;
 
     public BeanFactory2()
     {
         this.singletonObjects=new HashMap<String, Object>();
         this.earlySingletonObjects=new HashMap<String, Object>();
         this.singletonFactories=new HashMap<String, ObjectFactory<?>>();
+        proxyCreator=new ProxyCreator();
     }
 
     // 创建对象
@@ -34,14 +37,15 @@ public class BeanFactory2 {
 
         if(earlySingletonExposure)
         {
+            // addSingletonFactory(beanName,ObjectFactory);
             addSingletonFactory(beanName,()->{
-                CglibProxyFactory proxyFactory=new CglibProxyFactory(bean);
-                return proxyFactory.createProxyInstance();
+                return this.proxyCreator.getEarlyBeanReference(beanName,bean);
             });
         }
         this.populateBean(bean);
 
-        T exposedObject= (T) this.wrapInstance(bean);
+        T exposedObject= (T) this.proxyCreator.wrapInstance(beanName,bean);
+
         return exposedObject;
     }
 
@@ -59,12 +63,6 @@ public class BeanFactory2 {
         }
     }
 
-    // aop
-    private Object wrapInstance(Object obj)
-    {
-        CglibProxyFactory proxyFactory=new CglibProxyFactory(obj);
-        return proxyFactory.createProxyInstance();
-    }
 
     private Object getSingleton(String beanName) throws Exception {
         Object singletonObject=this.singletonObjects.get(beanName);
@@ -102,6 +100,7 @@ public class BeanFactory2 {
         if(this.earlySingletonObjects.containsKey(beanName))
         {
             this.earlySingletonObjects.remove(beanName);
+            this.singletonFactories.remove(beanName);
         }
     }
 
